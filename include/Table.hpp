@@ -1,17 +1,17 @@
 #ifndef __MYTABLE
 #define __MYTABLE
 
-#include "Case.hpp"
+#include "Piece.hpp"
 
 
 class Table
 {
     
 private:
-    vector< vector<Case> > mytable;
+    vector< vector<Piece*> > mytable;
     
 public:
-    Table(int row, int columns);
+    Table(int row_count, int columns_count);
     
 };
 

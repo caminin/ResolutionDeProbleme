@@ -2,31 +2,31 @@
 
 using namespace std;
 
-vector<string> &split(const string &s, char delim, vector<string> &elems) {
+vector<int> &split(const string &s, char delim, vector<int> &elems) {
     stringstream ss(s);
     string item;
     while (getline(ss, item, delim)) {
-        elems.push_back(item);
+        elems.push_back(stoi(item,0));
     }
     return elems;
 }
 
 
-vector<string> split(const string &s, char delim) {
-    vector<string> elems;
+vector<int> split(const string &s, char delim) {
+    vector<int> elems;
     split(s, delim, elems);
     return elems;
 }
 
 
-void parseFile(string file_name)
+void parseFile(Table *mytable, Pile *mypile,string file_name)
 {
     ifstream file(file_name.c_str());
     if (file.is_open())
     {		
         string first_line;
         getline(file,first_line);
-        vector<string> tab_line=split(first_line,' ');
+        vector<int> tab_line=split(first_line,' ');
         if(tab_line.size()!=2)
         {
             cerr << "Le fichier est mal formatté" << endl;
@@ -34,18 +34,29 @@ void parseFile(string file_name)
         else
         {
             //On récupère le nombre de lignes et colonnes
-            int line_count=stoi(tab_line[0],0);
-            int row_count=stoi(tab_line[1],0);
+            int rows_count=tab_line[1];
+            int columns_count=tab_line[0];
             
-            cout << "line : " << line_count <<" and row : " << row_count << endl;
+            cout << "row : " << rows_count <<" and columns : " << columns_count << endl;
+            mytable=new Table(rows_count,columns_count);
+            mypile=new Pile();
             
         }
         
         string line;
         while(getline(file,line))
         {
-            cout << line << endl;
+            tab_line=split(line,' ');
+            if(tab_line.size()!=4)
+            {
+                cerr << "Le fichier est mal formatté" << endl;
+            }
+            else
+            {
+                mypile->addPiece(new Piece(tab_line,BAS));
+            }
         }
+        cout << mypile->to_string() << endl;
 	    file.close();
         
         #ifdef DEBUG

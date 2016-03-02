@@ -2,6 +2,7 @@
 #define __MYFILE
 
 #include "Table.hpp"
+#include "Pile.hpp"
 
 #include <vector>
 #include <iostream>
@@ -11,9 +12,9 @@
 
 using namespace std;
 
-vector<string> &split(const string &s, char delim, vector<string> &elems) ;
-vector<string> split(const string &s, char delim);
-void parseFile(string file_name);
+vector<int> &split(const string &s, char delim, vector<int> &elems) ;
+vector<int> split(const string &s, char delim);
+void parseFile(Table *mytable, Pile *mypile,string file_name);
 
 
 

@@ -1,6 +1,7 @@
 TARGET = prog.exe
 
-SRCS = Case.cpp\
+SRCS = Piece.cpp\
+        Pile.cpp\
         Table.cpp\
         File.cpp\
         main.cpp\

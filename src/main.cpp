@@ -4,6 +4,8 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
+    Table *mytable;
+    Pile *mypile;
 #ifdef DEBUG
 
     string file_name=argc+argv[0];
@@ -14,7 +16,7 @@ int main(int argc, char **argv)
     {
         string file_name=argv[1];
 #endif
-        parseFile(file_name);
+        parseFile(mytable,mypile,file_name);
     }
     return 0;
 }
