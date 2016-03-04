@@ -1,7 +1,7 @@
 TARGET = prog.exe
 
 SRCS = Piece.cpp\
-        Pile.cpp\
+        Chrono.cpp\
         Table.cpp\
         File.cpp\
         main.cpp\

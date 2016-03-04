@@ -19,7 +19,7 @@ vector<int> split(const string &s, char delim) {
 }
 
 
-void parseFile(Table *mytable, Pile *mypile,string file_name)
+void parseFile(Table *mytable, vector<Piece*> &mypile,string file_name)
 {
     ifstream file(file_name.c_str());
     if (file.is_open())
@@ -38,8 +38,7 @@ void parseFile(Table *mytable, Pile *mypile,string file_name)
             int columns_count=tab_line[0];
             
             cout << "row : " << rows_count <<" and columns : " << columns_count << endl;
-            mytable=new Table(rows_count,columns_count);
-            mypile=new Pile();
+            *mytable=Table(rows_count,columns_count);
             
         }
         
@@ -53,14 +52,15 @@ void parseFile(Table *mytable, Pile *mypile,string file_name)
             }
             else
             {
-                mypile->addPiece(new Piece(tab_line,BAS));
+                mypile.insert(mypile.begin(),new Piece(tab_line,BAS));
             }
         }
-        cout << mypile->to_string() << endl;
+        
 	    file.close();
         
         #ifdef DEBUG
             printf("Je sors de la lecture\n");
+            cout << mypile.size() << endl;
         #endif
     }
     else
