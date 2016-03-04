@@ -24,6 +24,7 @@ public:
     
     void setRotation(int new_rotation);
     int getRotation(){return myrotation;}
+    int getId(){return id;}
     
     void rotation();
     void rotation1();

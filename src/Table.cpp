@@ -147,6 +147,18 @@ Table::showTable()
         cout << endl;
     }
 }
+void
+Table::getRes()
+{
+    for(int i=0;i<rows_count;i++)
+    {
+        for(int j=0;j<columns_count;j++)
+        {
+            cout << "Case("<<i<<","<<j<<") : "<<(get<0>(mytable[i][j]))->getId() << " Rotation :" << (get<0>(mytable[i][j]))->getRotation() << endl;
+        }
+    }
+
+}
 
 void 
 Table::rotate(int row, int column)
