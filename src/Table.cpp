@@ -1,6 +1,9 @@
 #include "../include/Table.hpp"
 
 
+Chrono c_table(0,"microseconds");
+
+
 Table::Table(int _rows_count,int _columns_count) : rows_count(_rows_count),columns_count(_columns_count)
 {
     mytable.resize(_rows_count,vector<pair<Piece*,int> >(_columns_count,make_pair<>(nullptr,0)));
@@ -172,7 +175,7 @@ Table::algoCSP(vector<Piece*> &mypile)
     vector< pair<Piece*,int> > pile_rec;
     vector< pair<int,int> > coord;
     pair<int,int> coord_actual=make_pair(0,0);
-    Chrono chrono(0,"seconds");
+    Chrono chrono(0,"milliseconds");
     chrono.start();
     bool end=false;
 
@@ -189,6 +192,7 @@ Table::algoCSP(vector<Piece*> &mypile)
         }
     }
     
+    c_table.start();
     while(pile_rec.size()>0 && end==false)
     {
         //cout << pile_rec.size() << endl;
@@ -199,39 +203,37 @@ Table::algoCSP(vector<Piece*> &mypile)
         coord.pop_back();
         int c_row=get<0>(coord_actual);
         int c_column=get<1>(coord_actual);
+        int i=0,j=0;
         
-        for(int i=0;i<rows_count;i++)
+        while((get<0>(mytable[i][j]))!=nullptr)
         {
-            for(int j=0;j<columns_count;j++)
+            
+            if(i>c_row)
             {
-                if(i>c_row)
+                removePiece(i,j);
+            }
+            else if(i==c_row)
+            {
+                if(j>=c_column)
                 {
                     removePiece(i,j);
                 }
-                else if(i==c_row)
-                {
-                    if(j>=c_column)
-                    {
-                        removePiece(i,j);
-                    }
-                }
-                if((get<0>(mytable[i][j]))!=nullptr)
-                {
-                    get<0>(mytable[i][j])->setRotation(get<1>(mytable[i][j]));
-                }
             }
-        }
-        addPiece(c_row,c_column,piece);
-        for(int i=0;i<rows_count;i++)
-        {
-            for(int j=0;j<columns_count;j++)
+            else
             {
-                if((get<0>(mytable[i][j]))!=nullptr)
-                {
-                    get<0>(mytable[i][j])->setRotation(get<1>(mytable[i][j]));
-                }
+                //get<0>(mytable[i][j])->setRotation(get<1>(mytable[i][j]));
+            }
+            j++;
+            if(j==columns_count)
+            {
+                j=0;
+                i++;
             }
         }
+        
+        
+        addPiece(c_row,c_column,piece);
+        get<0>(mytable[c_row][c_column])->setRotation(get<1>(mytable[c_row][c_column]));
         
         if(c_column==columns_count-1)
         {
@@ -254,27 +256,13 @@ Table::algoCSP(vector<Piece*> &mypile)
         {
             for(Piece *p:mypile)
             {
-                
-                for(int i=0;i<4;i++)
+                bool identical=p->isInside(mytable);
+                if(identical==false)
                 {
-                    p->rotation();
-                    if(checkPiece(c_row,c_column,p))
+                    for(int i=0;i<4;i++)
                     {
-                        bool identical=false;
-                        for(vector< pair<Piece*,int> > v:mytable)
-                        {
-                            for(pair<Piece*,int>p2:v)
-                            {
-                                if(get<0>(p2)!=nullptr)
-                                {
-                                    if(*get<0>(p2)==*p)
-                                    {
-                                        identical=true;
-                                    }
-                                }
-                            }
-                        }
-                        if(identical==false)
+                        p->rotation();
+                        if(checkPiece(c_row,c_column,p))
                         {
                             pile_rec.push_back(make_pair<>(p,p->getRotation()));
                             coord.push_back(make_pair<>(c_row,c_column));
@@ -286,6 +274,8 @@ Table::algoCSP(vector<Piece*> &mypile)
         
         
     }
+    c_table.stop();
+    cout << "table : " << c_table.getTime() << endl;
     
     chrono.stop();
     return chrono;

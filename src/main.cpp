@@ -9,7 +9,7 @@ int main(int argc, char **argv)
 #ifdef DEBUG
 
     string file_name=argc+argv[0];
-    file_name="./txt/pieces_04x04.txt";
+    file_name="./txt/pieces_05x05.txt";
     {
 #else
     if(argc>1)

@@ -20,6 +20,27 @@ Piece::setRotation(int new_rotation)
     }
 }
 
+
+bool
+Piece::isInside(vector<  vector<pair<Piece*,int > > > &mytable)
+{
+    for(vector< pair<Piece*,int> > v:mytable)
+    {
+        for(pair<Piece*,int>p2:v)
+        {
+            if(get<0>(p2)!=nullptr)
+            {
+                if(*get<0>(p2)==*this)
+                {
+                    return true;
+                }
+            }
+        }
+    }
+    
+    return false;
+}
+
 void
 Piece::rotation()
 {
