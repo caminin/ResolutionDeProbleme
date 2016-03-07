@@ -8,6 +8,7 @@ Piece::Piece(vector<int> _color, int _rotation)
     Piece::id_all++;
     mycolor=_color;
     myrotation=_rotation;
+    placed=false;
 }
 
 

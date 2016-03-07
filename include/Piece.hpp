@@ -16,6 +16,7 @@ private:
     static int id_all;
     int id;
     int myrotation;
+    bool placed;
     vector<int> mycolor;
 
     
@@ -24,6 +25,9 @@ public:
     
     void setRotation(int new_rotation);
     int getRotation(){return myrotation;}
+    void setPlaced(){placed=true;}
+    void setUnplaced(){placed=false;}
+    bool getPlaced(){return placed;}
     int getId(){return id;}
     
     bool isInside(vector<  vector<pair<Piece*,int > > > &mytable);

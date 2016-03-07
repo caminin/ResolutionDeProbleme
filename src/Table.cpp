@@ -178,7 +178,6 @@ Table::algoCSP(vector<Piece*> &mypile)
     vector< pair<Piece*,int> > pile_rec;
     vector< pair<int,int> > coord;
     pair<Piece*,int> piece;
-    bool identical;
     int c_row,c_column,i,j;
     pair<int,int> coord_actual=make_pair(0,0);
     Chrono chrono(0,"milliseconds");
@@ -209,7 +208,13 @@ Table::algoCSP(vector<Piece*> &mypile)
         c_row=get<0>(coord_actual);
         c_column=get<1>(coord_actual);
         
+        if(mytable[c_row][c_column].first!=nullptr)
+        {
+            mytable[c_row][c_column].first->setUnplaced();
+        }
         addPiece(c_row,c_column,piece);
+        piece.first->setPlaced();
+        
         for(i=0;i<rows_count;i++)
         {
             for(j=0;j<columns_count;j++)
@@ -244,6 +249,7 @@ Table::algoCSP(vector<Piece*> &mypile)
             j=c_column;
             while(get<0>(mytable[i][j])!=nullptr)
             {
+                get<0>(mytable[i][j])->setUnplaced();
                 removePiece(i,j);
                 j++;
                 if(j>=columns_count)
@@ -254,27 +260,12 @@ Table::algoCSP(vector<Piece*> &mypile)
             }
             for(Piece *p:mypile)
             {
-                
-                for(i=0;i<4;i++)
+                if(p->getPlaced()==false)
                 {
-                    p->rotation();
-                    if(checkPiece(c_row,c_column,p))
+                    for(i=0;i<4;i++)
                     {
-                        identical=false;
-                        for(vector< pair<Piece*,int> > v:mytable)
-                        {
-                            for(pair<Piece*,int>p2:v)
-                            {
-                                if(get<0>(p2)!=nullptr)
-                                {
-                                    if(*get<0>(p2)==*p)
-                                    {
-                                        identical=true;
-                                    }
-                                }
-                            }
-                        }
-                        if(identical==false)
+                        p->rotation();
+                        if(checkPiece(c_row,c_column,p))
                         {
                             pile_rec.push_back(make_pair<>(p,p->getRotation()));
                             coord.push_back(make_pair<>(c_row,c_column));
