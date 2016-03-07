@@ -27,6 +27,7 @@ CXX = g++
 
 debug: CPPFLAGS += -DDEBUG
 debug: CXXFLAGS += -g
+debug: LDFLAGS += -g
 debug: all
 
 release: CPPFLAGS += -O2
