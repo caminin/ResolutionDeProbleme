@@ -9,10 +9,13 @@ int main(int argc, char **argv)
 #ifdef DEBUG
 
     string file_name=argc+argv[0];
-    file_name="./txt/pieces_05x05.txt";
+    string s1=string(argv[1]);
+    string s2=string(argv[2]);
+    file_name="./txt/pieces_0"+s1+"x0"+s2+".txt";
+    
     {
 #else
-    if(argc>1)
+    if(argc>2)
     {
         string file_name=argv[1];
 #endif

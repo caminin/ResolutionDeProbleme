@@ -26,8 +26,6 @@ public:
     int getRotation(){return myrotation;}
     int getId(){return id;}
     
-    bool isInside(vector<  vector<pair<Piece*,int > > > &mytable);
-    
     void rotation();
     void rotation1();
     void rotation2();
