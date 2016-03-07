@@ -3,19 +3,20 @@
 
 #include "Piece.hpp"
 #include "Chrono.hpp"
+#include <list>
 
 
 class Table
 {
     
 private:
-    vector<  vector<pair<Piece*,int > > > mytable;
+    vector<  vector< Piece* > > mytable;
     int rows_count;
     int columns_count;
     
 public:
     Table(int row_count, int columns_count);
-    void addPiece(int row, int column,pair<Piece*,int> p);
+    void addPiece(int row, int column,Piece* p);
     void removePiece(int row, int column);
     
     bool checkPiece(int row, int column,Piece *p);
@@ -28,3 +29,4 @@ public:
 };
 
 #endif
+
