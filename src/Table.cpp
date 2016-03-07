@@ -175,8 +175,8 @@ Chrono
 Table::algoCSP(vector<Piece*> &mypile)
 {
     //vector< pair<Piece*,int> > pile_rec;
-    list<Piece*> pile_rec_p;
-    list<int> pile_rec_r;
+    vector<Piece*> pile_rec_p;
+    vector<int> pile_rec_r;
     
     vector< pair<int,int> > coord;
     Piece* piece;
@@ -195,8 +195,8 @@ Table::algoCSP(vector<Piece*> &mypile)
             p->rotation();
             if(checkPiece(0,0,p))
             {
-                pile_rec_p.push_front(p);
-                pile_rec_r.push_front(p->getRotation());
+                pile_rec_p.push_back(p);
+                pile_rec_r.push_back(p->getRotation());
                 coord.push_back(coord_actual);
             }
         }
@@ -205,10 +205,10 @@ Table::algoCSP(vector<Piece*> &mypile)
     while(pile_rec_p.size()>0 && end==false)
     {
         //cout << pile_rec.size() << endl;
-        piece=pile_rec_p.front();
-        rot=pile_rec_r.front();
-        pile_rec_p.pop_front();
-        pile_rec_r.pop_front();
+        piece=pile_rec_p.back();
+        rot=pile_rec_r.back();
+        pile_rec_p.pop_back();
+        pile_rec_r.pop_back();
         
         coord_actual=coord.back();
         coord.pop_back();
@@ -275,8 +275,8 @@ Table::algoCSP(vector<Piece*> &mypile)
                         }
                         if(identical==false)
                         {
-                            pile_rec_p.push_front(p);
-                            pile_rec_r.push_front(p->getRotation());
+                            pile_rec_p.push_back(p);
+                            pile_rec_r.push_back(p->getRotation());
                             coord.push_back(make_pair<>(c_row,c_column));
                         }
                     }
