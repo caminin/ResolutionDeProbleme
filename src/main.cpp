@@ -23,7 +23,7 @@ int main(int argc, char **argv)
     
     cout << "Temps : "<<c.getTime() << endl;
     
-    mytable.showTable();
+    //mytable.showTable();
     mytable.getRes();
     
     return 0;

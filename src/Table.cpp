@@ -157,7 +157,7 @@ Table::getRes()
     {
         for(int j=0;j<columns_count;j++)
         {
-            cout << "Case("<<i<<","<<j<<") : "<<(get<0>(mytable[i][j]))->getId() << " Rotation :" << (get<0>(mytable[i][j]))->getRotation() << endl;
+            cout <<(get<0>(mytable[i][j]))->getId() << " " << (get<0>(mytable[i][j]))->getRotation() << endl;
         }
     }
 
