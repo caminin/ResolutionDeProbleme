@@ -4,6 +4,10 @@
 #include "Piece.hpp"
 #include "Chrono.hpp"
 #include <list>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
 
 
 class Table
@@ -23,7 +27,7 @@ public:
     void rotate(int row, int column);
     
     void showTable();
-    void getRes();
+    void getRes(string row, string column);
     
     Chrono algoCSP(vector<Piece*>& mypile);
 };

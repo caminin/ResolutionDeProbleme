@@ -37,7 +37,7 @@ void parseFile(Table *mytable, vector<Piece*> &mypile,string file_name)
             int rows_count=tab_line[1];
             int columns_count=tab_line[0];
             
-            cout << "row : " << rows_count <<" and columns : " << columns_count << endl;
+            //cout << "row : " << rows_count <<" and columns : " << columns_count << endl;
             *mytable=Table(rows_count,columns_count);
             
         }
@@ -59,8 +59,8 @@ void parseFile(Table *mytable, vector<Piece*> &mypile,string file_name)
 	    file.close();
         
         #ifdef DEBUG
-            printf("Je sors de la lecture\n");
-            cout << mypile.size() << endl;
+            //printf("Je sors de la lecture\n");
+            //cout << mypile.size() << endl;
         #endif
     }
     else

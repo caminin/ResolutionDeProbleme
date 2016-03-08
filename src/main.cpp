@@ -6,25 +6,21 @@ int main(int argc, char **argv)
 {
     Table mytable(0,0);
     vector<Piece*> mypile;
-#ifdef DEBUG
 
-    string file_name=argc+argv[0];
-    file_name="./txt/pieces_06x06.txt";
-    {
-#else
     if(argc>1)
     {
-        string file_name=argv[1];
-#endif
+        string s1=string(argv[1]);
+        string s2=string(argv[2]);
+        string file_name="./txt/pieces_0"+s1+"x0"+s2+".txt";
         parseFile(&mytable,mypile,file_name);
+        
+        Chrono c=mytable.algoCSP(mypile);
+        
+        //cout << "Temps : "<<c.getTime() << endl;
+        
+        //mytable.showTable();
+        mytable.getRes(s1,s2);
     }
-    cout << mypile.size() << endl;
-    Chrono c=mytable.algoCSP(mypile);
-    
-    cout << "Temps : "<<c.getTime() << endl;
-    
-    mytable.showTable();
-    mytable.getRes();
     
     return 0;
 }

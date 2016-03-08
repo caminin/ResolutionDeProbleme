@@ -4,7 +4,7 @@
 Chrono c_table(0,"microseconds");
 
 
-
+using namespace std;
 Table::Table(int _rows_count,int _columns_count) : rows_count(_rows_count),columns_count(_columns_count)
 {
     mytable.resize(_rows_count,vector<Piece* >(_columns_count,nullptr));
@@ -156,14 +156,16 @@ Table::showTable()
 
 
 void
-Table::getRes()
+Table::getRes(string row, string column)
 {
+    string s("./sol/solution_"+row+"_"+column+".txt");
+    ofstream fichier(s.c_str(), ios::out| ios::trunc);
+
     for(int i=0;i<rows_count;i++)
     {
         for(int j=0;j<columns_count;j++)
         {
-            //cout << "Case("<<i<<","<<j<<") : "<<((mytable[i][j]))->getId() << " Rotation :" << ((mytable[i][j]))->getRotation() << endl;
-            cout <<((mytable[i][j]))->getId() << " " << ((mytable[i][j]))->getRotation() << endl;
+            fichier <<((mytable[i][j]))->getId() << " " << ((mytable[i][j]))->getRotation() << endl;
         }
     }
 
