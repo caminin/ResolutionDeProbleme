@@ -16,7 +16,7 @@ private:
     
 public:
     Table(int row_count, int columns_count);
-    void addPiece(int row, int column,pair<Piece*,int> p);
+    void addPiece(int row, int column,pair<Piece*,int> &p);
     void removePiece(int row, int column);
     
     bool checkPiece(int row, int column,Piece *p);

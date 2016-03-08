@@ -11,15 +11,26 @@ Table::Table(int _rows_count,int _columns_count) : rows_count(_rows_count),colum
 
 
 void
-Table::addPiece(int row, int column,pair<Piece*,int> p)
+Table::addPiece(int row, int column,pair<Piece*,int> &p)
 {
+    if(mytable[row][column].first!=nullptr)
+    {
+        mytable[row][column].first->setUnplaced();
+    }
     mytable[row][column]=p;
+    p.first->setPlaced();
+    p.first->setRotation(p.second);
 }
 
 void
 Table::removePiece(int row, int column)
 {
-   get<0>(mytable[row][column])=nullptr;
+    if(mytable[row][column].first!=nullptr)
+    {
+        mytable[row][column].first->setUnplaced();
+        mytable[row][column].first=nullptr;
+        mytable[row][column].second=BAS;
+    }
 }
 
 
@@ -199,8 +210,6 @@ Table::algoCSP(vector<Piece*> &mypile)
     
     while(pile_rec.size()>0 && end==false)
     {
-        //showTable();
-        //cout << pile_rec.size() << endl;
         piece=pile_rec.back();
         pile_rec.pop_back();
         
@@ -209,59 +218,65 @@ Table::algoCSP(vector<Piece*> &mypile)
         c_row=get<0>(coord_actual);
         c_column=get<1>(coord_actual);
         
-        if(mytable[c_row][c_column].first!=nullptr)
+        if(piece.first->getPlaced()==false)
         {
-            mytable[c_row][c_column].first->setUnplaced();
-        }
-        addPiece(c_row,c_column,piece);
-        piece.first->setPlaced();
-        piece.first->setRotation(piece.second);
-        
-        if(c_column==columns_count-1)
-        {
-            c_column=0;
-            if(c_row==rows_count-1)
+            
+            addPiece(c_row,c_column,piece);
+            
+            ++c_column;
+            
+            if(c_column>=columns_count)
             {
-                end=true;
+                c_column=0;
+                ++c_row;
+                
+                if(c_row>=rows_count)
+                {
+                    end=true;
+                }
             }
-            else
+            
+            if(end==false)
             {
-                c_row++;
+                i=c_row;
+                j=c_column;
+                while(get<0>(mytable[i][j])!=nullptr)
+                {
+                    removePiece(i,j);
+                    j++;
+                    if(j>=columns_count)
+                    {
+                        i++;
+                        j=0;
+                    }
+                }
+                for(Piece *p:mypile)
+                {
+                    if(p->getPlaced()==false)
+                    {
+                        for(i=0;i<4;i++)
+                        {
+                            p->rotation();
+                            if(checkPiece(c_row,c_column,p))
+                            {
+                                pile_rec.push_back(make_pair<>(p,p->getRotation()));
+                                coord.push_back(make_pair<>(c_row,c_column));
+                            }
+                        }
+                    }
+                }
             }
         }
         else
         {
-            c_column++;
-        }
-        
-        if(end==false)
-        {
-            i=c_row;
-            j=c_column;
-            while(get<0>(mytable[i][j])!=nullptr)
+            while(get<0>(mytable[c_row][c_column])!=nullptr)
             {
-                get<0>(mytable[i][j])->setUnplaced();
-                removePiece(i,j);
-                j++;
-                if(j>=columns_count)
+                removePiece(c_row,c_column);
+                ++c_column;
+                if(c_column>=columns_count)
                 {
-                    i++;
-                    j=0;
-                }
-            }
-            for(Piece *p:mypile)
-            {
-                if(p->getPlaced()==false)
-                {
-                    for(i=0;i<4;i++)
-                    {
-                        p->rotation();
-                        if(checkPiece(c_row,c_column,p))
-                        {
-                            pile_rec.push_back(make_pair<>(p,p->getRotation()));
-                            coord.push_back(make_pair<>(c_row,c_column));
-                        }
-                    }
+                    c_row++;
+                    c_column=0;
                 }
             }
         }
