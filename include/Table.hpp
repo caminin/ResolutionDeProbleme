@@ -4,26 +4,28 @@
 #include "Piece.hpp"
 #include "Chrono.hpp"
 #include <list>
-
+#include <iostream>
+#include <fstream>
 
 class Table
 {
     
 private:
-    vector<  vector<pair<Piece*,int > > > mytable;
+    vector<  vector<Piece* > > mytable;
+    vector<vector<int> > mytable_rotation;
     int rows_count;
     int columns_count;
     
 public:
     Table(int row_count, int columns_count);
-    void addPiece(int row, int column,pair<Piece*,int> &p);
+    void addPiece(int row, int column,Piece* p,int rot);
     void removePiece(int row, int column);
     
     bool checkPiece(int row, int column,Piece *p);
     void rotate(int row, int column);
     
     void showTable();
-    void getRes();
+    void getRes(string row, string column);
     
     Chrono algoCSP(vector<Piece*>& mypile);
 };

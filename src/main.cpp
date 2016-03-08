@@ -14,14 +14,13 @@ int main(int argc, char **argv)
         string file_name="./txt/pieces_0"+s1+"x0"+s2+".txt";
         
         parseFile(&mytable,mypile,file_name);
+        Chrono c=mytable.algoCSP(mypile);
+        
+        cout << "Temps : "<<c.getTime() << endl;
+        
+        mytable.showTable();
+        mytable.getRes(argv[1],argv[2]);
     }
-    cout << mypile.size() << endl;
-    Chrono c=mytable.algoCSP(mypile);
-    
-    cout << "Temps : "<<c.getTime() << endl;
-    
-    mytable.showTable();
-    mytable.getRes();
     
     return 0;
 }

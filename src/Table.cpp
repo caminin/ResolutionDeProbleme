@@ -6,30 +6,31 @@ Chrono c_table(0,"microseconds");
 
 Table::Table(int _rows_count,int _columns_count) : rows_count(_rows_count),columns_count(_columns_count)
 {
-    mytable.resize(_rows_count,vector<pair<Piece*,int> >(_columns_count,make_pair<>(nullptr,0)));
+    mytable.resize(_rows_count,vector<Piece*>(_columns_count,nullptr));
+    mytable_rotation.resize(_rows_count,vector<int>(_columns_count,BAS));
 }
 
 
 void
-Table::addPiece(int row, int column,pair<Piece*,int> &p)
+Table::addPiece(int row, int column,Piece* p, int rot)
 {
-    if(mytable[row][column].first!=nullptr)
+    if(mytable[row][column]!=nullptr)
     {
-        mytable[row][column].first->setUnplaced();
+        mytable[row][column]->setUnplaced();
     }
     mytable[row][column]=p;
-    p.first->setPlaced();
-    p.first->setRotation(p.second);
+    p->setPlaced();
+    p->setRotation(rot);
 }
 
 void
 Table::removePiece(int row, int column)
 {
-    if(mytable[row][column].first!=nullptr)
+    if(mytable[row][column]!=nullptr)
     {
-        mytable[row][column].first->setUnplaced();
-        mytable[row][column].first=nullptr;
-        mytable[row][column].second=BAS;
+        mytable[row][column]->setUnplaced();
+        mytable[row][column]=nullptr;
+        mytable_rotation[row][column]=BAS;
     }
 }
 
@@ -49,9 +50,9 @@ Table::checkPiece(int row, int column,Piece *p)
         {
             return false;
         }
-        else if((get<0>(mytable[row+1][column]))!=nullptr)
+        else if(((mytable[row+1][column]))!=nullptr)
         {
-            if(pBAS != (get<0>(mytable[row+1][column]))->getColor1(HAUT))//on vérifie en bas
+            if(pBAS != ((mytable[row+1][column]))->getColor1(HAUT))//on vérifie en bas
             {
                 return false;
             }
@@ -63,9 +64,9 @@ Table::checkPiece(int row, int column,Piece *p)
         {
             return false;
         }
-        else if((get<0>(mytable[row-1][column]))!=nullptr)
+        else if(((mytable[row-1][column]))!=nullptr)
         {
-            if(pHAUT != (get<0>(mytable[row-1][column]))->getColor1(BAS))//on vérifie en haut
+            if(pHAUT != ((mytable[row-1][column]))->getColor1(BAS))//on vérifie en haut
             {
                 return false;
             }
@@ -73,16 +74,16 @@ Table::checkPiece(int row, int column,Piece *p)
     }
     else
     {
-        if((get<0>(mytable[row-1][column]))!=nullptr)
+        if(((mytable[row-1][column]))!=nullptr)
         {
-            if(pHAUT != (get<0>(mytable[row-1][column]))->getColor1(BAS))//on vérifie en haut
+            if(pHAUT != ((mytable[row-1][column]))->getColor1(BAS))//on vérifie en haut
             {
                 return false;
             }
         }
-        if((get<0>(mytable[row+1][column]))!=nullptr)
+        if(((mytable[row+1][column]))!=nullptr)
         {
-            if(pBAS != (get<0>(mytable[row+1][column]))->getColor1(HAUT))//on vérifie en bas
+            if(pBAS != ((mytable[row+1][column]))->getColor1(HAUT))//on vérifie en bas
             {
                 return false;
             }
@@ -96,9 +97,9 @@ Table::checkPiece(int row, int column,Piece *p)
         {
             return false;
         }
-        else if((get<0>(mytable[row][column+1]))!=nullptr)
+        else if(((mytable[row][column+1]))!=nullptr)
         {
-            if(pDROITE != (get<0>(mytable[row][column+1]))->getColor1(GAUCHE))
+            if(pDROITE != ((mytable[row][column+1]))->getColor1(GAUCHE))
             {
                 return false;
             }
@@ -111,9 +112,9 @@ Table::checkPiece(int row, int column,Piece *p)
         {
             return false;
         }
-        else if((get<0>(mytable[row][column-1]))!=nullptr)
+        else if(((mytable[row][column-1]))!=nullptr)
         {
-            if(pGAUCHE != (get<0>(mytable[row][column-1]))->getColor1(DROITE))
+            if(pGAUCHE != ((mytable[row][column-1]))->getColor1(DROITE))
             {
                 return false;
             }
@@ -122,16 +123,16 @@ Table::checkPiece(int row, int column,Piece *p)
     }
     else
     {
-        if((get<0>(mytable[row][column-1]))!=nullptr)
+        if(((mytable[row][column-1]))!=nullptr)
         {
-            if(pGAUCHE != (get<0>(mytable[row][column-1]))->getColor1(DROITE))
+            if(pGAUCHE != ((mytable[row][column-1]))->getColor1(DROITE))
             {
                 return false;
             }
         }
-        if((get<0>(mytable[row][column+1]))!=nullptr)
+        if(((mytable[row][column+1]))!=nullptr)
         {
-            if(pDROITE != (get<0>(mytable[row][column+1]))->getColor1(GAUCHE))
+            if(pDROITE != ((mytable[row][column+1]))->getColor1(GAUCHE))
             {
                 return false;
             }
@@ -147,11 +148,9 @@ Table::showTable()
     {
         for(int j=0;j<columns_count;j++)
         {
-            if((get<0>(mytable[i][j]))!=nullptr)
+            if(((mytable[i][j]))!=nullptr)
             {
-                //cout << get<1>(mytable[i][j])<< endl;
-                get<0>(mytable[i][j])->setRotation(get<1>(mytable[i][j]));
-                cout << (get<0>(mytable[i][j]))->to_string() << "|";
+                cout << ((mytable[i][j]))->to_string() << "|";
             }
             else
             {
@@ -161,15 +160,18 @@ Table::showTable()
         cout << endl;
     }
 }
+
 void
-Table::getRes()
+Table::getRes(string row, string column)
 {
+    string s("./sol/sol_"+row+"_"+column+".txt");
+    ofstream fichier(s.c_str(), ios::out| ios::trunc);
+
     for(int i=0;i<rows_count;i++)
     {
         for(int j=0;j<columns_count;j++)
         {
-            //cout << "Case("<<i<<","<<j<<") : "<<(get<0>(mytable[i][j]))->getId() << " Rotation :" << (get<0>(mytable[i][j]))->getRotation() << endl;
-            cout <<(get<0>(mytable[i][j]))->getId() << " " << (get<0>(mytable[i][j]))->getRotation() << endl;
+            fichier <<(mytable[i][j])->getId() << " " << (mytable[i][j])->getRotation() << endl;
         }
     }
 
@@ -178,7 +180,7 @@ Table::getRes()
 void 
 Table::rotate(int row, int column)
 {
-    (get<0>(mytable[row][column]))->rotation();
+    ((mytable[row][column]))->rotation();
 }
 
 
@@ -186,14 +188,19 @@ Table::rotate(int row, int column)
 Chrono
 Table::algoCSP(vector<Piece*> &mypile)
 {
-    vector< pair<Piece*,int> > pile_rec;
-    vector< pair<int,int> > coord;
-    pair<Piece*,int> piece;
+    vector< Piece* > pile_rec;
+    vector <int> rot_rec;
+    
+    vector< int > coord_x;
+    vector< int > coord_y;
+    Piece* piece;
+    int rot;
+    bool end=false;
+    
     int c_row,c_column,i,j;
-    pair<int,int> coord_actual=make_pair(0,0);
+    
     Chrono chrono(0,"milliseconds");
     chrono.start();
-    bool end=false;
 
     for(Piece *p:mypile)
     {
@@ -202,8 +209,10 @@ Table::algoCSP(vector<Piece*> &mypile)
             p->rotation();
             if(checkPiece(0,0,p))
             {
-                pile_rec.push_back(make_pair<>(p,p->getRotation()));
-                coord.push_back(coord_actual);
+                pile_rec.push_back(p);
+                rot_rec.push_back(p->getRotation());
+                coord_x.push_back(0);
+                coord_y.push_back(0);
             }
         }
     }
@@ -213,15 +222,19 @@ Table::algoCSP(vector<Piece*> &mypile)
         piece=pile_rec.back();
         pile_rec.pop_back();
         
-        coord_actual=coord.back();
-        coord.pop_back();
-        c_row=get<0>(coord_actual);
-        c_column=get<1>(coord_actual);
+        rot=rot_rec.back();
+        rot_rec.pop_back();
         
-        if(piece.first->getPlaced()==false)
+        c_row=coord_x.back();
+        coord_x.pop_back();
+        
+        c_column=coord_y.back();
+        coord_y.pop_back();
+        
+        if(piece->getPlaced()==false)
         {
             
-            addPiece(c_row,c_column,piece);
+            addPiece(c_row,c_column,piece,rot);
             
             ++c_column;
             
@@ -240,7 +253,7 @@ Table::algoCSP(vector<Piece*> &mypile)
             {
                 i=c_row;
                 j=c_column;
-                while(get<0>(mytable[i][j])!=nullptr)
+                while((mytable[i][j])!=nullptr)
                 {
                     removePiece(i,j);
                     j++;
@@ -259,8 +272,10 @@ Table::algoCSP(vector<Piece*> &mypile)
                             p->rotation();
                             if(checkPiece(c_row,c_column,p))
                             {
-                                pile_rec.push_back(make_pair<>(p,p->getRotation()));
-                                coord.push_back(make_pair<>(c_row,c_column));
+                                pile_rec.push_back(p);
+                                rot_rec.push_back(p->getRotation());
+                                coord_x.push_back(c_row);
+                                coord_y.push_back(c_column);
                             }
                         }
                     }
@@ -269,7 +284,7 @@ Table::algoCSP(vector<Piece*> &mypile)
         }
         else
         {
-            while(get<0>(mytable[c_row][c_column])!=nullptr)
+            while((mytable[c_row][c_column])!=nullptr)
             {
                 removePiece(c_row,c_column);
                 ++c_column;
