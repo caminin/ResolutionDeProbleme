@@ -199,6 +199,7 @@ Table::algoCSP(vector<Piece*> &mypile)
     
     while(pile_rec.size()>0 && end==false)
     {
+        //showTable();
         //cout << pile_rec.size() << endl;
         piece=pile_rec.back();
         pile_rec.pop_back();
