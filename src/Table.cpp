@@ -214,17 +214,7 @@ Table::algoCSP(vector<Piece*> &mypile)
         }
         addPiece(c_row,c_column,piece);
         piece.first->setPlaced();
-        
-        for(i=0;i<rows_count;i++)
-        {
-            for(j=0;j<columns_count;j++)
-            {
-                if((get<0>(mytable[i][j]))!=nullptr)
-                {
-                    get<0>(mytable[i][j])->setRotation(get<1>(mytable[i][j]));
-                }
-            }
-        }
+        piece.first->setRotation(piece.second);
         
         if(c_column==columns_count-1)
         {
