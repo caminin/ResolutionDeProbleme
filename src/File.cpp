@@ -58,10 +58,7 @@ void parseFile(Table *mytable, vector<Piece*> &mypile,string file_name)
         
 	    file.close();
         
-        #ifdef DEBUG
-            printf("Je sors de la lecture\n");
-            cout << mypile.size() << endl;
-        #endif
+        printf("Je sors de la lecture\n");
     }
     else
     {

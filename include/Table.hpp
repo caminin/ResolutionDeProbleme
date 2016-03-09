@@ -11,7 +11,7 @@ class Table
 {
     
 private:
-    vector<  vector<Piece* > > mytable;
+    Piece* **mytable;
     vector<vector<int> > mytable_rotation;
     int rows_count;
     int columns_count;

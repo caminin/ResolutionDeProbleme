@@ -6,7 +6,15 @@ Chrono c_table(0,"microseconds");
 
 Table::Table(int _rows_count,int _columns_count) : rows_count(_rows_count),columns_count(_columns_count)
 {
-    mytable.resize(_rows_count,vector<Piece*>(_columns_count,nullptr));
+    mytable=new Piece**[rows_count];
+    for(int i=0;i<rows_count;i++)
+    {
+        mytable[i]=new Piece*[columns_count];
+        for(int j=0;j<columns_count;j++)
+        {
+            mytable[i][j]=nullptr;
+        }
+    }
     mytable_rotation.resize(_rows_count,vector<int>(_columns_count,BAS));
 }
 
@@ -39,20 +47,21 @@ Table::removePiece(int row, int column)
 bool 
 Table::checkPiece(int row, int column,Piece *p)
 {
-    int pHAUT=p->getColor1(HAUT);
-    int pBAS=p->getColor1(BAS);
-    int pGAUCHE=p->getColor1(GAUCHE);
-    int pDROITE=p->getColor1(DROITE);
-    //on doit vérifier que le dessus s'ilest en bas
+    
+    
+    
+    //on doit vérifier que le dessus s'il est en bas
     if(row==0)//on vérifie en haut
     {
+        int pHAUT=p->getColor(HAUT);
         if(pHAUT!=0)
         {
             return false;
         }
         else if(((mytable[row+1][column]))!=nullptr)
         {
-            if(pBAS != ((mytable[row+1][column]))->getColor1(HAUT))//on vérifie en bas
+            int pBAS=p->getColor(BAS);
+            if(pBAS != ((mytable[row+1][column]))->getColor(HAUT))//on vérifie en bas
             {
                 return false;
             }
@@ -60,13 +69,15 @@ Table::checkPiece(int row, int column,Piece *p)
     }
     else if(row==(rows_count-1))//on vérifie en bas
     {
+        int pBAS=p->getColor(BAS);
         if(pBAS!=0)
         {
             return false;
         }
         else if(((mytable[row-1][column]))!=nullptr)
         {
-            if(pHAUT != ((mytable[row-1][column]))->getColor1(BAS))//on vérifie en haut
+            int pHAUT=p->getColor(HAUT);
+            if(pHAUT != ((mytable[row-1][column]))->getColor(BAS))//on vérifie en haut
             {
                 return false;
             }
@@ -76,30 +87,35 @@ Table::checkPiece(int row, int column,Piece *p)
     {
         if(((mytable[row-1][column]))!=nullptr)
         {
-            if(pHAUT != ((mytable[row-1][column]))->getColor1(BAS))//on vérifie en haut
+            int pHAUT=p->getColor(HAUT);
+            if(pHAUT != ((mytable[row-1][column]))->getColor(BAS))//on vérifie en haut
             {
                 return false;
             }
         }
         if(((mytable[row+1][column]))!=nullptr)
         {
-            if(pBAS != ((mytable[row+1][column]))->getColor1(HAUT))//on vérifie en bas
+            int pBAS=p->getColor(BAS);
+            if(pBAS != ((mytable[row+1][column]))->getColor(HAUT))//on vérifie en bas
             {
                 return false;
             }
         }
     }
         
-
+    
+    
     if(column==0)
     {
+        int pGAUCHE=p->getColor(GAUCHE);
         if(pGAUCHE!=0)
         {
             return false;
         }
         else if(((mytable[row][column+1]))!=nullptr)
         {
-            if(pDROITE != ((mytable[row][column+1]))->getColor1(GAUCHE))
+            int pDROITE=p->getColor(DROITE);
+            if(pDROITE != ((mytable[row][column+1]))->getColor(GAUCHE))
             {
                 return false;
             }
@@ -108,13 +124,15 @@ Table::checkPiece(int row, int column,Piece *p)
     }
     else if(column==(columns_count-1))
     {
+        int pDROITE=p->getColor(DROITE);
         if(pDROITE!=0)
         {
             return false;
         }
         else if(((mytable[row][column-1]))!=nullptr)
         {
-            if(pGAUCHE != ((mytable[row][column-1]))->getColor1(DROITE))
+            int pGAUCHE=p->getColor(GAUCHE);
+            if(pGAUCHE != ((mytable[row][column-1]))->getColor(DROITE))
             {
                 return false;
             }
@@ -125,14 +143,16 @@ Table::checkPiece(int row, int column,Piece *p)
     {
         if(((mytable[row][column-1]))!=nullptr)
         {
-            if(pGAUCHE != ((mytable[row][column-1]))->getColor1(DROITE))
+            int pGAUCHE=p->getColor(GAUCHE);
+            if(pGAUCHE != ((mytable[row][column-1]))->getColor(DROITE))
             {
                 return false;
             }
         }
         if(((mytable[row][column+1]))!=nullptr)
         {
-            if(pDROITE != ((mytable[row][column+1]))->getColor1(GAUCHE))
+            int pDROITE=p->getColor(DROITE);
+            if(pDROITE != ((mytable[row][column+1]))->getColor(GAUCHE))
             {
                 return false;
             }

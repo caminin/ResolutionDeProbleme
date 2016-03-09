@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <utility>
+#include <algorithm>
 
 using namespace std;
 
@@ -25,20 +26,15 @@ public:
     
     void setRotation(int new_rotation);
     int getRotation(){return myrotation;}
+    
     void setPlaced(){placed=true;}
     void setUnplaced(){placed=false;}
     bool getPlaced(){return placed;}
     int getId(){return id;}
     
-    bool isInside(vector<  vector<pair<Piece*,int > > > &mytable);
-    
     void rotation();
-    void rotation1();
-    void rotation2();
     
     int getColor(Face face);
-    int getColor1(Face face);
-    int getColor2(Face face);
     
     string to_string();
     bool operator==(Piece p1);
