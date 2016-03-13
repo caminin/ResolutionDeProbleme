@@ -6,7 +6,7 @@ Chrono c_table(0,"microseconds");
 
 Table::Table(int _rows_count,int _columns_count) : rows_count(_rows_count),columns_count(_columns_count)
 {
-    mytable=new Piece**[rows_count];
+    mytable=new Piece**[rows_count];    
     for(int i=0;i<rows_count;i++)
     {
         mytable[i]=new Piece*[columns_count];
@@ -216,10 +216,11 @@ Table::algoCSP(vector<Piece*> &mypile)
     Piece* piece;
     int rot;
     bool end=false;
+    bool needRemove=false;
     
     int c_row,c_column,i,j;
     
-    Chrono chrono(0,"milliseconds");
+    Chrono chrono(0,"seconds");
     chrono.start();
 
     for(Piece *p:mypile)
@@ -250,6 +251,31 @@ Table::algoCSP(vector<Piece*> &mypile)
         
         c_column=coord_y.back();
         coord_y.pop_back();
+        int nb=0;
+        for(int i=0;i<rows_count;i++)
+        {
+            for(int j=0;j<columns_count;j++)
+            {
+                if(mytable[i][j]!=nullptr)
+                {
+                    nb++;
+                }
+            }
+        }
+        if(nb>27)
+        {
+            for(int i=0;i<rows_count;i++)
+            {
+                for(int j=0;j<columns_count;j++)
+                {
+                    if(mytable[i][j]!=nullptr)
+                    {
+                        cout << (mytable[i][j])->getId() << " " << (mytable[i][j])->getRotation() << endl;
+                        }
+                }
+            }
+            cout << endl;
+        }
         
         if(piece->getPlaced()==false)
         {
@@ -279,8 +305,8 @@ Table::algoCSP(vector<Piece*> &mypile)
                     j++;
                     if(j>=columns_count)
                     {
-                        i++;
                         j=0;
+                        ++i;
                     }
                 }
                 for(Piece *p:mypile)
@@ -304,15 +330,40 @@ Table::algoCSP(vector<Piece*> &mypile)
         }
         else
         {
-            while((mytable[c_row][c_column])!=nullptr)
+            if(mytable[c_row][c_column]->getId()==piece->getId())
             {
-                removePiece(c_row,c_column);
-                ++c_column;
-                if(c_column>=columns_count)
+                piece->setRotation(rot);
+            }
+            ++c_column;
+            
+            if(c_column>=columns_count)
+            {
+                c_column=0;
+                ++c_row;
+                
+                if(c_row<rows_count)
                 {
-                    c_row++;
-                    c_column=0;
+                    needRemove=true;
                 }
+            }
+            else
+            {
+                needRemove=true; 
+            }
+            
+            if(needRemove==true)
+            {
+                while((mytable[c_row][c_column])!=nullptr)
+                    {
+                        removePiece(c_row,c_column);
+                        ++c_column;
+                        if(c_column>=columns_count)
+                        {
+                            c_column=0;
+                            ++c_row;
+                  
+                        }
+                    }
             }
         }
         

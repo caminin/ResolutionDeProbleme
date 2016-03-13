@@ -18,7 +18,9 @@ private:
     int id;
     int myrotation;
     bool placed;
-    vector<int> mycolor;
+    int* mycolor;
+    
+    int **index_tab;
 
     
 public:
@@ -34,7 +36,7 @@ public:
     
     void rotation();
     
-    int getColor(Face face);
+    int getColor(int face);
     
     string to_string();
     bool operator==(Piece p1);
