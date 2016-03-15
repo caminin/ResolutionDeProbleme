@@ -53,11 +53,6 @@ Piece::rotation()
     {
         ++myrotation;
     }
-    /*int temp=mycolor[3];
-    mycolor[3]=mycolor[2];
-    mycolor[2]=mycolor[1];
-    mycolor[1]=mycolor[0];
-    mycolor[0]=temp;*/
     mycolor=index_tab[myrotation];
 }
 
@@ -75,6 +70,21 @@ Piece::to_string()
     string res="Pièce de couleur "+std::to_string(mycolor[0])+"/"+std::to_string(mycolor[1])+"/"+std::to_string(mycolor[2])+"/"+std::to_string(mycolor[3]);
     
     return res;
+}
+
+int
+Piece::borderCount()
+{
+    int nb=0;
+    bool res=false;
+    for(int i=0;i<4;i++)
+    {
+        if(getColor(i)==0)
+        {
+            nb++;
+        }
+    }
+    return nb;
 }
 
 bool

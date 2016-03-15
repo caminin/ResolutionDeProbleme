@@ -47,9 +47,6 @@ Table::removePiece(int row, int column)
 bool 
 Table::checkPiece(int row, int column,Piece *p)
 {
-    
-    
-    
     //on doit vérifier que le dessus s'il est en bas
     if(row==0)//on vérifie en haut
     {
@@ -203,6 +200,148 @@ Table::rotate(int row, int column)
     ((mytable[row][column]))->rotation();
 }
 
+Piece* 
+Table::getCorner(int id)
+{
+    Piece* p=nullptr;
+    switch(id)
+    {
+        case 0:
+            p=mytable[0][0];
+            break;
+        case 1:
+            p=mytable[rows_count-1][0];
+            break;
+        case 2:
+            p=mytable[0][columns_count-1];
+            break;
+        case 3:
+            p=mytable[rows_count-1][columns_count-1];
+            break;
+        default:
+            cerr<<"pas de "<< id <<" coin"
+    }
+    
+    return p;
+}
+
+Piece* 
+Table::getBorder(int id)
+{
+    int i=0,j=0;
+    for(i=1;i<rows_count-1;i++)//parcours bord gauche
+    {
+        if(id==0)
+        {
+            return mytable[i][j];
+        }
+        else
+        {
+            id--;
+        }
+    }
+    for(i=rows_count-2,j=1;j<columns_count-1;j++)//parcours bord bas
+    {
+        if(id==0)
+        {
+            return mytable[i][j];
+        }
+        else
+        {
+            id--;
+        }
+    }
+    for(i=rows_count-2,j=columns_count-2;i>0;i--)//parcours bord droit
+    {
+        if(id==0)
+        {
+            return mytable[i][j];
+        }
+        else
+        {
+            id--;
+        }
+    }
+    for(i=1,j=columns_count-2;j>1;j--)//parcours bord haut
+    {
+        if(id==0)
+        {
+            return mytable[i][j];
+        }
+        else
+        {
+            id--;
+        }
+    }
+    
+    cerr << "erreur dans le nombre de bord, il reste "<<id<<endl;
+    return nullptr;
+}
+
+Piece* 
+Table::getInsider(int id)
+{
+    for(int i=1;i<rows_count-2;i++)
+    {
+        for(int j=1;j<columns_count-2;j++)
+        {
+            if(id==0)
+            {
+                return mytable[i][j];
+            }
+            else
+            {
+                id--;
+            }
+        }
+    }
+    cerr << "erreur dans le nombre d'intérieurs', il reste "<<id<<endl;
+    return nullptr;
+}
+
+void 
+Table::instanciation(vector<Piece*> &mypile)
+{
+    int border_count=0,corner_count=0,insider_count=0;
+    random_shuffle(mypile.begin(),mypile.end());
+    for(Piece *p:mypile)
+    {
+        switch(p->borderCount())
+        {
+            case 2://corner
+                getCorner(corner_count)=p;
+                corner_count++;
+                break;
+            case 1://borderCount
+                getBorder(borderCount)=p;
+                borderCount++;
+                break;
+            case 0://insider
+                getInsider(insider_count)=p;
+                insider_count++;
+                break;
+        }
+    }
+}
+
+
+Chrono
+Table::algoLocalSearch(vector<Piece*> &mypile)
+{
+    int corner_count=0;
+    int border_count=0;
+    int piece_count=0;
+    
+    Chrono chrono(0,"milliseconds");
+    chrono.start();
+    
+    instanciation(mypile);
+    
+    chrono.stop();
+    
+    return chrono;
+}
+
 
 
 Chrono
@@ -220,7 +359,7 @@ Table::algoCSP(vector<Piece*> &mypile)
     
     int c_row,c_column,i,j;
     
-    Chrono chrono(0,"seconds");
+    Chrono chrono(0,"milliseconds");
     chrono.start();
 
     for(Piece *p:mypile)
@@ -252,34 +391,22 @@ Table::algoCSP(vector<Piece*> &mypile)
         c_column=coord_y.back();
         coord_y.pop_back();
         int nb=0;
-        for(int i=0;i<rows_count;i++)
+        
+        i=c_row;
+        j=c_column;
+        while((mytable[i][j])!=nullptr)
         {
-            for(int j=0;j<columns_count;j++)
+            removePiece(i,j);
+            j++;
+            if(j>=columns_count)
             {
-                if(mytable[i][j]!=nullptr)
-                {
-                    nb++;
-                }
+                j=0;
+                ++i;
             }
-        }
-        if(nb>27)
-        {
-            for(int i=0;i<rows_count;i++)
-            {
-                for(int j=0;j<columns_count;j++)
-                {
-                    if(mytable[i][j]!=nullptr)
-                    {
-                        cout << (mytable[i][j])->getId() << " " << (mytable[i][j])->getRotation() << endl;
-                        }
-                }
-            }
-            cout << endl;
         }
         
         if(piece->getPlaced()==false)
         {
-            
             addPiece(c_row,c_column,piece,rot);
             
             ++c_column;
@@ -297,18 +424,7 @@ Table::algoCSP(vector<Piece*> &mypile)
             
             if(end==false)
             {
-                i=c_row;
-                j=c_column;
-                while((mytable[i][j])!=nullptr)
-                {
-                    removePiece(i,j);
-                    j++;
-                    if(j>=columns_count)
-                    {
-                        j=0;
-                        ++i;
-                    }
-                }
+                
                 for(Piece *p:mypile)
                 {
                     if(p->getPlaced()==false)
@@ -322,6 +438,15 @@ Table::algoCSP(vector<Piece*> &mypile)
                                 rot_rec.push_back(p->getRotation());
                                 coord_x.push_back(c_row);
                                 coord_y.push_back(c_column);
+                                if(mytable[2][0]!=nullptr && nb>11)
+                                {
+                                    if(mytable[2][0]->getId()==8&&mytable[2][0]->getRotation()==1)
+                                    {
+                                        cout << p->to_string() <<"|"<<p->getId()<<"|" << p->getRotation() << endl;
+                                    }
+                                    cout << endl;
+                                    
+                                }
                             }
                         }
                     }
@@ -333,6 +458,7 @@ Table::algoCSP(vector<Piece*> &mypile)
             if(mytable[c_row][c_column]->getId()==piece->getId())
             {
                 piece->setRotation(rot);
+
             }
             ++c_column;
             
@@ -354,16 +480,16 @@ Table::algoCSP(vector<Piece*> &mypile)
             if(needRemove==true)
             {
                 while((mytable[c_row][c_column])!=nullptr)
+                {
+                    removePiece(c_row,c_column);
+                    ++c_column;
+                    if(c_column>=columns_count)
                     {
-                        removePiece(c_row,c_column);
-                        ++c_column;
-                        if(c_column>=columns_count)
-                        {
-                            c_column=0;
-                            ++c_row;
-                  
-                        }
+                        c_column=0;
+                        ++c_row;
                     }
+                }
+                
             }
         }
         

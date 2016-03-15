@@ -28,6 +28,14 @@ public:
     void getRes(string row, string column);
     
     Chrono algoCSP(vector<Piece*>& mypile);
+    
+    void instanciation(vector<Piece*> &mypile);
+    Chrono algoLocalSearch(vector<Piece*> &mypile);
+    
+    Piece* getCorner(int id);
+    Piece* getBorder(int id);
+    Piece* getInsider(int id);
+    
 };
 
 #endif

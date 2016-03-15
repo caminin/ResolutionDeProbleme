@@ -37,6 +37,7 @@ public:
     void rotation();
     
     int getColor(int face);
+    int borderCount();
     
     string to_string();
     bool operator==(Piece p1);
