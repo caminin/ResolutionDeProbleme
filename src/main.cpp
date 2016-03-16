@@ -4,6 +4,7 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
+    srand(time(NULL));
     Table mytable(0,0);
     vector<Piece*> mypile;
     
@@ -11,14 +12,14 @@ int main(int argc, char **argv)
     {
         string s1=string(argv[1]);
         string s2=string(argv[2]);
-        string file_name="./txt/pieces_0"+s1+"x0"+s2+".txt";
+        string file_name="./txt/pieces_"+s1+"x"+s2+".txt";
         
         parseFile(&mytable,mypile,file_name);
-        Chrono c=mytable.algoCSP(mypile);
+        Chrono c=mytable.algoLocalSearch(mypile);
         
         cout << "Temps : "<<c.getTime() << endl;
         
-        mytable.showTable();
+        //mytable.showTable();
         mytable.getRes(argv[1],argv[2]);
     }
     

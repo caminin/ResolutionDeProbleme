@@ -20,7 +20,7 @@ private:
     bool placed;
     int* mycolor;
     
-    int **index_tab;
+    int **index_tab_color;
 
     
 public:
@@ -37,6 +37,7 @@ public:
     void rotation();
     
     int getColor(int face);
+    int *getAllColor();
     int borderCount();
     
     string to_string();

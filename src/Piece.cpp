@@ -9,26 +9,27 @@ Piece::Piece(vector<int> _color, int _rotation)
     myrotation=_rotation;
     placed=false;
     
-    index_tab=new int*[4];
+    index_tab_color=new int*[4];
     for(int i=0;i<4;i++)
     {
-        index_tab[i]=new int[4];
+        index_tab_color[i]=new int[4];
     }
     
     int index=0;
     for(int c:_color)
     {
-       index_tab[0][index]=c;
+       index_tab_color[0][index]=c;
        index=((index==3)?0:++index);
-       index_tab[1][index]=c;
+       index_tab_color[1][index]=c;
        index=((index==3)?0:++index);
-       index_tab[2][index]=c;
+       index_tab_color[2][index]=c;
        index=((index==3)?0:++index);
-       index_tab[3][index]=c;
+       index_tab_color[3][index]=c;
        index=((index==3)?0:++index);
        
        index=((index==3)?0:++index);
     }
+    mycolor=index_tab_color[BAS];
 }
 
 
@@ -53,7 +54,7 @@ Piece::rotation()
     {
         ++myrotation;
     }
-    mycolor=index_tab[myrotation];
+    mycolor=index_tab_color[myrotation];
 }
 
 
@@ -61,6 +62,12 @@ int
 Piece::getColor(int face)
 {
     return mycolor[face];  
+}
+
+int*
+Piece::getAllColor()
+{
+    return mycolor;
 }
 
 
@@ -76,7 +83,6 @@ int
 Piece::borderCount()
 {
     int nb=0;
-    bool res=false;
     for(int i=0;i<4;i++)
     {
         if(getColor(i)==0)

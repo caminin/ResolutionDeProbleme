@@ -3,6 +3,8 @@
 
 Chrono c_table(0,"microseconds");
 
+using namespace std;
+
 
 Table::Table(int _rows_count,int _columns_count) : rows_count(_rows_count),columns_count(_columns_count)
 {
@@ -200,150 +202,6 @@ Table::rotate(int row, int column)
     ((mytable[row][column]))->rotation();
 }
 
-Piece* 
-Table::getCorner(int id)
-{
-    Piece* p=nullptr;
-    switch(id)
-    {
-        case 0:
-            p=mytable[0][0];
-            break;
-        case 1:
-            p=mytable[rows_count-1][0];
-            break;
-        case 2:
-            p=mytable[0][columns_count-1];
-            break;
-        case 3:
-            p=mytable[rows_count-1][columns_count-1];
-            break;
-        default:
-            cerr<<"pas de "<< id <<" coin"
-    }
-    
-    return p;
-}
-
-Piece* 
-Table::getBorder(int id)
-{
-    int i=0,j=0;
-    for(i=1;i<rows_count-1;i++)//parcours bord gauche
-    {
-        if(id==0)
-        {
-            return mytable[i][j];
-        }
-        else
-        {
-            id--;
-        }
-    }
-    for(i=rows_count-2,j=1;j<columns_count-1;j++)//parcours bord bas
-    {
-        if(id==0)
-        {
-            return mytable[i][j];
-        }
-        else
-        {
-            id--;
-        }
-    }
-    for(i=rows_count-2,j=columns_count-2;i>0;i--)//parcours bord droit
-    {
-        if(id==0)
-        {
-            return mytable[i][j];
-        }
-        else
-        {
-            id--;
-        }
-    }
-    for(i=1,j=columns_count-2;j>1;j--)//parcours bord haut
-    {
-        if(id==0)
-        {
-            return mytable[i][j];
-        }
-        else
-        {
-            id--;
-        }
-    }
-    
-    cerr << "erreur dans le nombre de bord, il reste "<<id<<endl;
-    return nullptr;
-}
-
-Piece* 
-Table::getInsider(int id)
-{
-    for(int i=1;i<rows_count-2;i++)
-    {
-        for(int j=1;j<columns_count-2;j++)
-        {
-            if(id==0)
-            {
-                return mytable[i][j];
-            }
-            else
-            {
-                id--;
-            }
-        }
-    }
-    cerr << "erreur dans le nombre d'intérieurs', il reste "<<id<<endl;
-    return nullptr;
-}
-
-void 
-Table::instanciation(vector<Piece*> &mypile)
-{
-    int border_count=0,corner_count=0,insider_count=0;
-    random_shuffle(mypile.begin(),mypile.end());
-    for(Piece *p:mypile)
-    {
-        switch(p->borderCount())
-        {
-            case 2://corner
-                getCorner(corner_count)=p;
-                corner_count++;
-                break;
-            case 1://borderCount
-                getBorder(borderCount)=p;
-                borderCount++;
-                break;
-            case 0://insider
-                getInsider(insider_count)=p;
-                insider_count++;
-                break;
-        }
-    }
-}
-
-
-Chrono
-Table::algoLocalSearch(vector<Piece*> &mypile)
-{
-    int corner_count=0;
-    int border_count=0;
-    int piece_count=0;
-    
-    Chrono chrono(0,"milliseconds");
-    chrono.start();
-    
-    instanciation(mypile);
-    
-    chrono.stop();
-    
-    return chrono;
-}
-
-
-
 Chrono
 Table::algoCSP(vector<Piece*> &mypile)
 {
@@ -499,4 +357,553 @@ Table::algoCSP(vector<Piece*> &mypile)
     chrono.stop();
     return chrono;
 }
+
+void 
+Table::instanciation(vector<Piece*> &mypile)
+{
+    int border_count=0,corner_count=0,insider_count=0;
+    random_shuffle(mypile.begin(),mypile.end());
+    pair<int,int> pair;
+    for(Piece *p:mypile)
+    {
+        switch(p->borderCount())
+        {
+            case 2://corner
+                pair=getCorner(corner_count);
+                insertCorner(pair.first,pair.second,p);
+                corner_count++;
+                break;
+            case 1://borderCount
+                pair=getBorder(border_count);
+                insertBorder(pair.first,pair.second,p);
+                border_count++;
+                break;
+            case 0://insider
+                pair=getInsider(insider_count);
+                insertInsider(pair.first,pair.second,p);
+                insider_count++;
+                break;
+        }
+    }
+}
+
+
+Chrono
+Table::algoLocalSearch(vector<Piece*> &mypile)
+{
+    int degen_count=0,nonmdif_count=0;
+    int degen_max=1,nonmodif_max=100,nb_piece_to_swap=100;
+
+
+    std::random_device rd;     // only used once to initialise (seed) engine
+    std::mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
+    std::uniform_int_distribution<int> uni_row(0,rows_count-1); // guaranteed unbiased
+    std::uniform_int_distribution<int> uni_column(0,columns_count-1); // guaranteed unbiased
+    
+    
+    int number_of_corners=4;
+    int number_of_borders=(rows_count)*2+(columns_count)*2-8;
+    int number_of_insiders=(rows_count)*(columns_count)-number_of_borders-number_of_corners;
+    
+    cout << number_of_corners << "|"<< number_of_borders << "|"<< number_of_insiders << "|" << endl;
+    
+    std::uniform_int_distribution<int> uni_corners(0,number_of_corners-1); // guaranteed unbiased
+    std::uniform_int_distribution<int> uni_borders(0,number_of_borders-1); // guaranteed unbiased
+    std::uniform_int_distribution<int> uni_insiders(0,number_of_insiders-1); // guaranteed unbiased
+
+    instanciation(mypile);
+
+    Chrono chrono(0,"milliseconds");
+    chrono.start();
+    
+    int nb_errors;
+    for(int i=0;i<rows_count;i++)
+    {
+        for(int j=0;j<columns_count;j++)
+        {
+            nb_errors+=numberOfErrors(i,j,mytable[i][j]);
+        }
+    }
+    
+    while(degen_count<degen_max)
+    {
+        std::mt19937 rng(rd());
+        while(nonmdif_count<nonmodif_max)
+        {
+            PIECE_STATUS piece;
+            bool modif=false;
+            int row=uni_row(rng);
+            int initial_row=row;
+            int column=uni_column(rng);
+            int initial_column=column;
+            pair<int,int> new_piece;
+            
+            if(row==0 || row == (rows_count-1))
+            {
+                if(column==0||column==columns_count-1)
+                {
+                    piece=COIN;
+                }
+                else
+                {
+                    piece=BORD;
+                }
+            }
+            else if(column==0||column==columns_count-1)
+            {
+                piece=BORD;
+            }
+            else
+            {
+                piece=INTERIEUR;
+            }
+            
+            
+            for(int i=0;i<nb_piece_to_swap;i++)//On fait le nombre de swap nécessaire
+            {
+                switch(piece)
+                {
+                    case COIN:
+                        getCorner(uni_corners(rng));
+                        while(new_piece.first==row || new_piece.second==column)
+                        {
+                            new_piece=getCorner(uni_corners(rng));
+                        }
+                        break;
+                    case BORD:
+                        new_piece=getBorder(uni_borders(rng));
+                        while(new_piece.first==row || new_piece.second==column)
+                        {
+                            new_piece=getBorder(uni_borders(rng));
+                        }
+                        break;
+                    case INTERIEUR:
+                        new_piece=getInsider(uni_insiders(rng));
+                        if(number_of_insiders>1)
+                        {
+                            while(new_piece.first==row || new_piece.second==column)
+                            {
+                                new_piece=getInsider(uni_insiders(rng));
+                            }
+                        }
+                        break;
+                }
+                if(betterSwap(new_piece.first,new_piece.second,row,column))
+                {
+                    //cout << "Je passe de " << numberOfErrors(row,column,mytable[row][column]) << " à "<< numberOfErrors(new_piece.first,new_piece.second,mytable[new_piece.first][new_piece.second]) << endl;
+                    row=new_piece.first;
+                    column=new_piece.second;
+                    modif=true;
+                }
+            }
+            if(modif==false)
+            {
+                nonmdif_count++;
+            }
+            else
+            {
+                cout <<"first"<< mytable[initial_row][initial_column]->to_string() << endl;
+                switch(piece)
+                {
+                    case COIN:
+                        insertCorner(initial_row,initial_column,mytable[row][column]);
+                        break;
+                    case BORD:
+                        insertBorder(initial_row,initial_column,mytable[row][column]);
+                        break;
+                    case INTERIEUR:
+                        insertInsider(initial_row,initial_column,mytable[row][column]);
+                        break;
+                }
+                cout << "second "<<mytable[initial_row][initial_column]->to_string() << endl;
+                nb_errors=0;
+                for(int i=0;i<rows_count;i++)
+                {
+                    for(int j=0;j<columns_count;j++)
+                    {
+                        nb_errors+=numberOfErrors(i,j,mytable[i][j]);
+                    }
+                }
+                cout << nb_errors << endl;
+            }
+        }
+        
+        degen_count++;
+    }
+    cout << "Il y a " << nb_errors<< "erreurs" <<endl;
+    
+    
+    
+    chrono.stop();
+    
+    return chrono;
+}
+
+pair<int,int>
+Table::getCorner(int id)
+{
+    
+    switch(id)
+    {
+        case 0:
+            return make_pair<>(0,0);
+        case 1:
+            return make_pair<>(rows_count-1,0);
+        case 2:
+            return make_pair<>(0,columns_count-1);
+        case 3:
+            return make_pair<>(rows_count-1,columns_count-1);
+        default:
+            cerr<<"pas de "<< id <<" coin" <<endl;
+    }
+    return make_pair<>(0,0);
+}
+
+pair<int,int>
+Table::getBorder(int id)
+{
+    int i=0,j=0;
+    for(i=1;i<rows_count-1;i++)//parcours bord gauche
+    {
+        if(id==0)
+        {
+            //(mytable[i][j])->setRotation(0);
+            return make_pair<>(i,j);
+        }
+        else
+        {
+            id--;
+        }
+    }
+    i=rows_count-1;
+    for(j=1;j<columns_count-1;j++)//parcours bord bas
+    {
+        if(id==0)
+        {
+            //(mytable[i][j])->setRotation(1);
+            return make_pair<>(i,j);
+        }
+        else
+        {
+            id--;
+        }
+    }
+    j=columns_count-1;
+    for(i=rows_count-2;i>0;i--)//parcours bord droit
+    {
+        if(id==0)
+        {
+            //(mytable[i][j])->setRotation(2);
+            return make_pair<>(i,j);
+        }
+        else
+        {
+            id--;
+        }
+    }
+    i=0;
+    for(j=columns_count-2;j>1;j--)//parcours bord haut
+    {
+        if(id==0)
+        {
+            //(mytable[i][j])->setRotation(3);
+            return make_pair<>(i,j);
+        }
+        else
+        {
+            id--;
+        }
+    }
+    if(id==0)
+    {
+        return make_pair<>(i,j);
+    }
+    
+    cerr << "erreur dans le nombre de bord, il reste "<<id<<endl;
+    return make_pair<>(-1,-1);
+}
+
+pair<int,int>
+Table::getInsider(int id)
+{
+    for(int i=1;i<rows_count-1;i++)
+    {
+        for(int j=1;j<columns_count-1;j++)
+        {
+            if(id==0)
+            {
+                return make_pair<>(i,j);
+            }
+            else
+            {
+                id--;
+            }
+        }
+    }
+    cerr << "erreur dans le nombre d'intérieurs', il reste "<<id<<endl;
+    return make_pair<>(-1,-1);
+}
+
+void 
+Table::insertCorner(int row, int column,Piece* p)
+{
+    mytable[row][column]=p;
+    if(row==0)
+    {
+        if(column==0)
+        {
+            while(p->getColor(HAUT)!=0 || p->getColor(GAUCHE)!=0)
+            {
+                p->rotation();
+            }
+        }
+        else
+        {
+            while(p->getColor(HAUT)!=0 || p->getColor(DROITE)!=0)
+            {
+                p->rotation();
+            }
+        }
+    }
+    else
+    {
+        if(column==0)
+        {
+            while(p->getColor(BAS)!=0 || p->getColor(GAUCHE)!=0)
+            {
+                p->rotation();
+            }
+        }
+        else
+        {
+            while(p->getColor(BAS)!=0 || p->getColor(DROITE)!=0)
+            {
+                p->rotation();
+            }
+        }
+    }
+}
+
+void 
+Table::insertBorder(int row, int column,Piece* p)
+{
+    mytable[row][column]=p;
+    if(row==0)
+    {
+        while(p->getColor(HAUT)!=0)
+        {
+            p->rotation();
+        }
+    }
+    else if(row==columns_count-1)
+    {
+        while(p->getColor(BAS)!=0)
+        {
+            p->rotation();
+        }
+    }
+    else if(column==0)
+    {
+        while(p->getColor(GAUCHE)!=0)
+        {
+            p->rotation();
+        }
+    }
+    else
+    {
+        while(p->getColor(DROITE)!=0)
+        {
+            p->rotation();
+        }
+    }
+}
+
+void 
+Table::insertInsider(int row, int column,Piece* p)
+{
+    mytable[row][column]=p;
+    int best_rot=BAS;
+    int min_error=numberOfErrors(row,column,p);
+    int temp;
+    for(int i=1;i<4;i++)
+    {
+        p->rotation();
+        temp=numberOfErrors(row,column,p);
+        if(min_error>temp)
+        {
+            best_rot=i;
+            min_error=temp;
+        }
+    }
+    
+    p->setRotation(best_rot);
+}
+
+
+
+int 
+Table::numberOfErrors(int row, int column,Piece* p,int rotation)
+{
+    int old_rotation=p->getRotation();
+    p->setRotation(rotation);
+    int count=0;
+    int* tab_color=p->getAllColor();
+    //on doit vérifier que le dessus s'il est en bas
+    if(row==0)//on vérifie en haut
+    {
+        if(((mytable[row+1][column]))!=nullptr)
+        {
+            int pBAS=tab_color[BAS];
+            if(pBAS != ((mytable[row+1][column]))->getColor(HAUT))//on vérifie en bas
+            {
+                count++;
+            }
+        }
+    }
+    else if(row==(rows_count-1))//on vérifie en bas
+    {
+        if(((mytable[row-1][column]))!=nullptr)
+        {
+            int pHAUT=tab_color[HAUT];
+            if(pHAUT != ((mytable[row-1][column]))->getColor(BAS))//on vérifie en haut
+            {
+                count++;
+            }
+        }
+    }
+    else
+    {
+        if(((mytable[row-1][column]))!=nullptr)
+        {
+            int pHAUT=tab_color[HAUT];
+            if(pHAUT != ((mytable[row-1][column]))->getColor(BAS))//on vérifie en haut
+            {
+                count++;
+            }
+        }
+        if(((mytable[row+1][column]))!=nullptr)
+        {
+            int pBAS=tab_color[BAS];
+            if(pBAS != ((mytable[row+1][column]))->getColor(HAUT))//on vérifie en bas
+            {
+                count++;
+            }
+        }
+    }
+        
+    if(column==0)
+    {
+        if(((mytable[row][column+1]))!=nullptr)
+        {
+            int pDROITE=tab_color[DROITE];
+            if(pDROITE != ((mytable[row][column+1]))->getColor(GAUCHE))
+            {
+                count++;
+            }
+        }
+        
+    }
+    else if(column==(columns_count-1))
+    {
+        if(((mytable[row][column-1]))!=nullptr)
+        {
+            int pGAUCHE=tab_color[GAUCHE];
+            if(pGAUCHE != ((mytable[row][column-1]))->getColor(DROITE))
+            {
+                count++;
+            }
+        }
+        
+    }
+    else
+    {
+        if(((mytable[row][column-1]))!=nullptr)
+        {
+            int pGAUCHE=tab_color[GAUCHE];
+            if(pGAUCHE != ((mytable[row][column-1]))->getColor(DROITE))
+            {
+                count++;
+            }
+        }
+        if(((mytable[row][column+1]))!=nullptr)
+        {
+            int pDROITE=tab_color[DROITE];
+            if(pDROITE != ((mytable[row][column+1]))->getColor(GAUCHE))
+            {
+                count++;
+            }
+        }
+    }
+    p->setRotation(old_rotation);
+    return count;
+}
+
+
+
+
+bool 
+Table::betterSwap(int row1, int column1, int row2, int column2,PIECE_STATUS piece)
+{
+    switch(piece)
+    {
+        case INTERIEUR:
+            int best_rot1=0;
+            int value1=numberOfErrors(row1,column1,mytable[row1][column1],0);
+            for(int i=1;i<4;i++)
+            {
+                int temp=numberOfErrors(row1,column1,mytable[row1][column1],i);
+                if(value>temp)
+                {
+                    best_rot1=i;
+                    value=temp;
+                }
+            }
+            
+            int best_rot2=0;
+            int value2=numberOfErrors(row2,column2,mytable[row2][column2],0);
+            for(int i=1;i<4;i++)
+            {
+                int temp=numberOfErrors(row2,column2,mytable[row2][column2],i);
+                if(value>temp)
+                {
+                    best_rot1=i;
+                    value=temp;
+                }
+            }
+            break;
+        default:
+            
+            break;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
