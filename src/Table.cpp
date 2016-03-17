@@ -181,7 +181,7 @@ Table::showTable()
 }
 
 void
-Table::getRes(string row, string column)
+Table::getRes(string     row, string column)
 {
     string s("./sol/sol_"+row+"_"+column+".txt");
     ofstream fichier(s.c_str(), ios::out| ios::trunc);
@@ -392,7 +392,7 @@ Chrono
 Table::algoLocalSearch(vector<Piece*> &mypile)
 {
     int degen_count=0,nonmdif_count=0;
-    int degen_max=1,nonmodif_max=100,nb_piece_to_swap=100;
+    int degen_max=1,nonmodif_max=10,nb_piece_to_swap=10;
 
 
     std::random_device rd;     // only used once to initialise (seed) engine
@@ -416,7 +416,7 @@ Table::algoLocalSearch(vector<Piece*> &mypile)
     Chrono chrono(0,"milliseconds");
     chrono.start();
     
-    int nb_errors;
+    int nb_errors=0;
     for(int i=0;i<rows_count;i++)
     {
         for(int j=0;j<columns_count;j++)
@@ -424,6 +424,7 @@ Table::algoLocalSearch(vector<Piece*> &mypile)
             nb_errors+=numberOfErrors(i,j,mytable[i][j]);
         }
     }
+    cout << "Il y a au début "<<nb_errors << endl;
     
     while(degen_count<degen_max)
     {
@@ -465,14 +466,14 @@ Table::algoLocalSearch(vector<Piece*> &mypile)
                 {
                     case COIN:
                         getCorner(uni_corners(rng));
-                        while(new_piece.first==row || new_piece.second==column)
+                        while(new_piece.first!=row && new_piece.second!=column)
                         {
                             new_piece=getCorner(uni_corners(rng));
                         }
                         break;
                     case BORD:
                         new_piece=getBorder(uni_borders(rng));
-                        while(new_piece.first==row || new_piece.second==column)
+                        while(new_piece.first!=row && new_piece.second!=column)
                         {
                             new_piece=getBorder(uni_borders(rng));
                         }
@@ -481,16 +482,15 @@ Table::algoLocalSearch(vector<Piece*> &mypile)
                         new_piece=getInsider(uni_insiders(rng));
                         if(number_of_insiders>1)
                         {
-                            while(new_piece.first==row || new_piece.second==column)
+                            while((new_piece.first!=row) && (new_piece.second!=column))
                             {
                                 new_piece=getInsider(uni_insiders(rng));
                             }
                         }
                         break;
                 }
-                if(betterSwap(new_piece.first,new_piece.second,row,column))
+                if(betterSwap(new_piece.first,new_piece.second,row,column,piece))
                 {
-                    //cout << "Je passe de " << numberOfErrors(row,column,mytable[row][column]) << " à "<< numberOfErrors(new_piece.first,new_piece.second,mytable[new_piece.first][new_piece.second]) << endl;
                     row=new_piece.first;
                     column=new_piece.second;
                     modif=true;
@@ -502,33 +502,59 @@ Table::algoLocalSearch(vector<Piece*> &mypile)
             }
             else
             {
-                cout <<"first"<< mytable[initial_row][initial_column]->to_string() << endl;
-                switch(piece)
-                {
-                    case COIN:
-                        insertCorner(initial_row,initial_column,mytable[row][column]);
-                        break;
-                    case BORD:
-                        insertBorder(initial_row,initial_column,mytable[row][column]);
-                        break;
-                    case INTERIEUR:
-                        insertInsider(initial_row,initial_column,mytable[row][column]);
-                        break;
-                }
-                cout << "second "<<mytable[initial_row][initial_column]->to_string() << endl;
-                nb_errors=0;
+                int nb_errors1=0;
                 for(int i=0;i<rows_count;i++)
                 {
                     for(int j=0;j<columns_count;j++)
                     {
-                        nb_errors+=numberOfErrors(i,j,mytable[i][j]);
+                        nb_errors1+=numberOfErrors(i,j,mytable[i][j]);
                     }
                 }
-                cout << nb_errors << endl;
+                Piece *temp=mytable[initial_row][initial_column];
+                
+                switch(piece)//Il faut que les deux soient en plus puis de vérifier quelle situation est la meilleure et puis c'est bon
+                {
+                    case COIN:
+                        insertCorner(initial_row,initial_column,mytable[row][column]);
+                        insertCorner(row,column,temp);
+                        break;
+                    case BORD:
+                        insertBorder(initial_row,initial_column,mytable[row][column]);
+                        insertBorder(row,column,temp);
+                        break;
+                    case INTERIEUR:
+                        insertInsider(initial_row,initial_column,mytable[row][column]);
+                        insertInsider(row,column,temp);
+                        break;
+                }
+                int nb_errors2=0;
+                for(int i=0;i<rows_count;i++)
+                {
+                    for(int j=0;j<columns_count;j++)
+                    {
+                        nb_errors2+=numberOfErrors(i,j,mytable[i][j]);
+                    }
+                }
+                if(nb_errors1<=nb_errors2)
+                {
+                    cout << "erreur avant "<< nb_errors1 << ",erreurs après "<< nb_errors2 << " et pièce de type" << (int)piece << endl;
+                    /*getRes("04","04");
+                    string s;
+                    cin >> s;*/
+                }
             }
         }
         
         degen_count++;
+    }
+    
+    nb_errors=0;
+    for(int i=0;i<rows_count;i++)
+    {
+        for(int j=0;j<columns_count;j++)
+        {
+            nb_errors+=numberOfErrors(i,j,mytable[i][j]);
+        }
     }
     cout << "Il y a " << nb_errors<< "erreurs" <<endl;
     
@@ -648,95 +674,121 @@ void
 Table::insertCorner(int row, int column,Piece* p)
 {
     mytable[row][column]=p;
-    if(row==0)
-    {
-        if(column==0)
-        {
-            while(p->getColor(HAUT)!=0 || p->getColor(GAUCHE)!=0)
-            {
-                p->rotation();
-            }
-        }
-        else
-        {
-            while(p->getColor(HAUT)!=0 || p->getColor(DROITE)!=0)
-            {
-                p->rotation();
-            }
-        }
-    }
-    else
-    {
-        if(column==0)
-        {
-            while(p->getColor(BAS)!=0 || p->getColor(GAUCHE)!=0)
-            {
-                p->rotation();
-            }
-        }
-        else
-        {
-            while(p->getColor(BAS)!=0 || p->getColor(DROITE)!=0)
-            {
-                p->rotation();
-            }
-        }
-    }
+    p->setRotation(getBestRotation(row,column,p,COIN));
+    
 }
 
 void 
 Table::insertBorder(int row, int column,Piece* p)
 {
     mytable[row][column]=p;
-    if(row==0)
-    {
-        while(p->getColor(HAUT)!=0)
-        {
-            p->rotation();
-        }
-    }
-    else if(row==columns_count-1)
-    {
-        while(p->getColor(BAS)!=0)
-        {
-            p->rotation();
-        }
-    }
-    else if(column==0)
-    {
-        while(p->getColor(GAUCHE)!=0)
-        {
-            p->rotation();
-        }
-    }
-    else
-    {
-        while(p->getColor(DROITE)!=0)
-        {
-            p->rotation();
-        }
-    }
+    p->setRotation(getBestRotation(row,column,p,BORD));
+    
 }
 
 void 
 Table::insertInsider(int row, int column,Piece* p)
 {
     mytable[row][column]=p;
-    int best_rot=BAS;
-    int min_error=numberOfErrors(row,column,p);
+    p->setRotation(getBestRotation(row,column,p,INTERIEUR));
+}
+
+
+int 
+Table::getBestRotation(int row, int column,Piece* p,PIECE_STATUS piece)
+{
+    int best_rot;
+    int min_error;
     int temp;
-    for(int i=1;i<4;i++)
+    int old_rotation=p->getRotation();
+    switch(piece)
     {
-        p->rotation();
-        temp=numberOfErrors(row,column,p);
-        if(min_error>temp)
-        {
-            best_rot=i;
-            min_error=temp;
-        }
+        case INTERIEUR:
+            min_error=numberOfErrors(row,column,p);
+            for(int i=1;i<4;i++)
+            {
+                p->rotation();
+                temp=numberOfErrors(row,column,p);
+                if(min_error>temp)
+                {
+                    best_rot=i;
+                    min_error=temp;
+                }
+            }
+            break;
+            
+        case COIN:
+            if(row==0)
+            {
+                if(column==0)
+                {
+                    while(p->getColor(HAUT)!=0 || p->getColor(GAUCHE)!=0)
+                    {
+                        p->rotation();
+                    }
+                }
+                else
+                {
+                    while(p->getColor(HAUT)!=0 || p->getColor(DROITE)!=0)
+                    {
+                        p->rotation();
+                    }
+                }
+            }
+            else
+            {
+                if(column==0)
+                {
+                    while(p->getColor(BAS)!=0 || p->getColor(GAUCHE)!=0)
+                    {
+                        p->rotation();
+                    }
+                }
+                else
+                {
+                    while(p->getColor(BAS)!=0 || p->getColor(DROITE)!=0)
+                    {
+                        p->rotation();
+                    }
+                }
+            }
+            break;
+            
+        case BORD:
+            if(row==0)
+            {
+                while(p->getColor(HAUT)!=0)
+                {
+                    p->rotation();
+                }
+            }
+            else if(row==columns_count-1)
+            {
+                while(p->getColor(BAS)!=0)
+                {
+                    p->rotation();
+                }
+            }
+            else if(column==0)
+            {
+                while(p->getColor(GAUCHE)!=0)
+                {
+                    p->rotation();
+                }
+            }
+            else
+            {
+                while(p->getColor(DROITE)!=0)
+                {
+                    p->rotation();
+                }
+            }
+            break;
     }
+    best_rot=p->getRotation();
+    p->setRotation(old_rotation);
     
-    p->setRotation(best_rot);
+    return best_rot;
 }
 
 
@@ -745,7 +797,10 @@ int
 Table::numberOfErrors(int row, int column,Piece* p,int rotation)
 {
     int old_rotation=p->getRotation();
-    p->setRotation(rotation);
+    if(rotation!=-1)
+    {
+        p->setRotation(rotation);
+    }
     int count=0;
     int* tab_color=p->getAllColor();
     //on doit vérifier que le dessus s'il est en bas
@@ -844,37 +899,25 @@ Table::numberOfErrors(int row, int column,Piece* p,int rotation)
 bool 
 Table::betterSwap(int row1, int column1, int row2, int column2,PIECE_STATUS piece)
 {
-    switch(piece)
+    bool res;
+    int value1,value2;
+    value1=getBestRotation(row1,column1,mytable[row2][column2],piece);
+            
+    value2=getBestRotation(row2,column2,mytable[row1][column1],piece);
+            
+    if(value1+value2
+        <   
+        numberOfErrors(row1,column1,mytable[row1][column1])+numberOfErrors(row2,column2,mytable[row2][column2]))
     {
-        case INTERIEUR:
-            int best_rot1=0;
-            int value1=numberOfErrors(row1,column1,mytable[row1][column1],0);
-            for(int i=1;i<4;i++)
-            {
-                int temp=numberOfErrors(row1,column1,mytable[row1][column1],i);
-                if(value>temp)
-                {
-                    best_rot1=i;
-                    value=temp;
-                }
-            }
-            
-            int best_rot2=0;
-            int value2=numberOfErrors(row2,column2,mytable[row2][column2],0);
-            for(int i=1;i<4;i++)
-            {
-                int temp=numberOfErrors(row2,column2,mytable[row2][column2],i);
-                if(value>temp)
-                {
-                    best_rot1=i;
-                    value=temp;
-                }
-            }
-            break;
-        default:
-            
-            break;
+        res=true;
     }
+    else
+    {
+        res=false;
+    }
+    
+    return res;
+    
 }
 
 

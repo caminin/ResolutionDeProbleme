@@ -47,7 +47,9 @@ public:
     void insertBorder(int row, int column,Piece* p);
     void insertInsider(int row, int column,Piece* p);
     
-    int numberOfErrors(int row, int column,Piece* p,int rotation=0);
+    int getBestRotation(int row, int column,Piece* p,PIECE_STATUS piece);
+    
+    int numberOfErrors(int row, int column,Piece* p,int rotation=-1);
     bool betterSwap(int row1, int column1, int row2, int column2,PIECE_STATUS piece);
     
 };
