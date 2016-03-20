@@ -21,6 +21,8 @@ private:
     int rows_count;
     int columns_count;
     
+    int nb_piece_to_swap;
+    
 
     
 public:
@@ -37,20 +39,29 @@ public:
     Chrono algoCSP(vector<Piece*>& mypile);
     
     void instanciation(vector<Piece*> &mypile);
+    Chrono test(vector<Piece*> &mypile);
     Chrono algoLocalSearch(vector<Piece*> &mypile);
     
     pair<int,int> getCorner(int id);
     pair<int,int> getBorder(int id);
     pair<int,int> getInsider(int id);
+    bool isNeighbour(int row1, int column1,int row2, int column2);
+    pair<int,int> getPieceForSearch(int initial_row,int initial_column, PIECE_STATUS piece,std::mt19937 &rng);
+    int getNumberOfAllError();
+    
+    PIECE_STATUS getStatus(int row, int column);
     
     void insertCorner(int row, int column,Piece* p);
     void insertBorder(int row, int column,Piece* p);
     void insertInsider(int row, int column,Piece* p);
+    void swap(int row1, int column1, int row2, int column2,PIECE_STATUS piece);
+    void degeneration(int initial_row, int initial_column, PIECE_STATUS piece,std::mt19937 &rng);
     
     int getBestRotation(int row, int column,Piece* p,PIECE_STATUS piece);
+    pair<int,int> getBestRotationNeighbour(int row1, int column1,int row2, int column2,int &error);
     
     int numberOfErrors(int row, int column,Piece* p,int rotation=-1);
-    bool betterSwap(int row1, int column1, int row2, int column2,PIECE_STATUS piece);
+    int betterSwap(int row1, int column1, int row2, int column2,PIECE_STATUS piece);
     
 };
 

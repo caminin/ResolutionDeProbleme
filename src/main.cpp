@@ -16,6 +16,7 @@ int main(int argc, char **argv)
         
         parseFile(&mytable,mypile,file_name);
         Chrono c=mytable.algoLocalSearch(mypile);
+        //Chrono c=mytable.test(mypile);
         
         cout << "Temps : "<<c.getTime() << endl;
         
